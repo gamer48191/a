@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jogo de Drift com Modelo de Carro</title>
+<style>
+  body {
+    margin: 0;
+    background-color: #222;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="gameCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Carregar a imagem do carro
+const carImage = new Image();
+carImage.src = 'data:image/jpeg;base64,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'; // Substitua por sua imagem desejada
+
+// Dados do carro
+const car = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  width: 100,  // ajuste o tamanho da imagem
+  height: 50,
+  angle: 0,
+  speed: 0,
+  maxSpeed: 10,
+  acceleration: 0.2,
+  friction: 0.98,
+  turningSpeed: 0.05,
+  driftFactor: 0.98,
+  velocityX: 0,
+  velocityY: 0
+};
+
+// Controle do teclado
+const keys = {
+  ArrowUp: false,
+  ArrowDown: false,
+  ArrowLeft: false,
+  ArrowRight: false
+};
+
+window.addEventListener('keydown', (e) => {
+  if (keys.hasOwnProperty(e.key)) {
+    keys[e.key] = true;
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (keys.hasOwnProperty(e.key)) {
+    keys[e.key] = false;
+  }
+});
+
+// Desenha o carro com a imagem
+function drawCar() {
+  ctx.save();
+  ctx.translate(car.x, car.y);
+  ctx.rotate(car.angle);
+  ctx.drawImage(carImage, -car.width/2, -car.height/2, car.width, car.height);
+  ctx.restore();
+}
+
+// Loop do jogo
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Controle de aceleração
+  if (keys.ArrowUp) {
+    car.speed += car.acceleration;
+  }
+  if (keys.ArrowDown) {
+    car.speed -= car.acceleration;
+  }
+
+  // Limitar velocidade
+  if (car.speed > car.maxSpeed) car.speed = car.maxSpeed;
+  if (car.speed < -car.maxSpeed/2) car.speed = -car.maxSpeed/2;
+
+  // Controle de direção
+  if (keys.ArrowLeft) {
+    car.angle -= car.turningSpeed;
+  }
+  if (keys.ArrowRight) {
+    car.angle += car.turningSpeed;
+  }
+
+  // Atualizar velocidade com física de drift
+  const velocityX = Math.cos(car.angle) * car.speed;
+  const velocityY = Math.sin(car.angle) * car.speed;
+
+  // Aplicar fricção para simular drift
+  car.velocityX = velocityX * car.driftFactor;
+  car.velocityY = velocityY * car.driftFactor;
+
+  // Atualizar posição
+  car.x += car.velocityX;
+  car.y += car.velocityY;
+
+  // Desenha o carro
+  drawCar();
+
+  requestAnimationFrame(gameLoop);
+}
+
+// Ajustar tamanho do canvas ao redimensionar
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Quando a imagem estiver carregada, iniciar o jogo
+carImage.onload = () => {
+  gameLoop();
+};
+</script>
+
+</body>
+</html>
